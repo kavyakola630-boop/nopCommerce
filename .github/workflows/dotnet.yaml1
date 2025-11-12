@@ -1,0 +1,45 @@
+on:
+  push:
+    branches:
+       - develop
+jobs: 
+  dotnet_publish: 
+       runs-on: 'ubuntu-latest'
+       steps:  
+         - name: code checkout
+           uses: actions/checkout@v5
+         - name: aws configure
+           uses: aws-actions/configure-aws-credentials@v4
+           with:
+           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+           aws-region: ${{ env.AWS_REGION }}
+         - name: ECR login
+           uses: aws-actions/amazon-ecr-login@v2
+         - name: build and push
+           uses: docker/build-push-action@v6
+         - name: docker commands  
+           run: |
+            aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 256935247024.dkr.ecr.ap-south-1.amazonaws.com 
+             docker image build -t dotnetapp:1.0 .
+             docker image tag dotnet:1.0  tag  256935247024.dkr.ecr.ap-south-1.amazonaws.com/kavya:latest
+             docker push 991860535950.dkr.ecr.ap-south-1.amazonaws.com/mydummypodlevel:latest 
+         - name: EKS with manifestfile
+           uses: actions-hub/kubectl@master
+           env:
+             KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+         - uses: tale/kubectl-action@v1
+         -  run: |
+              kubectl apply -f .
+              kubectl get po 
+             docker image build -t dotnetapp:1.0 .
+             docker image tag dotnet:1.0 tag 256935247024.dkr.ecr.ap-south-1.amazonaws.com/kavya:latest
+             docker push 256935247024.dkr.ecr.ap-south-1.amazonaws.com/kavya:latest 
+         - name: EKS with manifestfile
+           uses: actions-hub/kubectl@master
+           env:
+             KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+         - uses: tale/kubectl-action@v1
+         -  run: |
+              kubectl apply -f .
+              kubectl get po
