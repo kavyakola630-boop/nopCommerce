@@ -29,7 +29,7 @@ jobs:
       # 4️⃣ Build Docker image
       - name: Build Docker image
         run: |
-          docker build -t dotnetapp:1.0 .
+          docker build -t dotnetapp:1.0  .
 
       # 5️⃣ Trivy Image Scan (vulnerability scan)
       - name: Trivy Image Scan
